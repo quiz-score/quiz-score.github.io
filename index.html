@@ -1,88 +1,166 @@
 <!doctype html>
 <html lang="ja"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>SCORE ROOM｜クイズ得点共有</title>
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f6f7fb">
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--tx:#e2e8f0;--mut:#94a3b8;--ac:#38bdf8;--ok:#22c55e;--ng:#ef4444;--win:#facc15;--rest:#a78bfa}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--tx);-webkit-tap-highlight-color:transparent}
-header{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;padding:10px 14px;background:#0b1222ee;border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
-header h1{font-size:17px;margin:0;letter-spacing:.06em}header .sp{flex:1}
-.pill{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--mut);white-space:nowrap}
-.pill.on{color:#0b1222;background:var(--ac);border-color:var(--ac)}
-main{max-width:1100px;margin:0 auto;padding:14px}
-.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-h2{font-size:15px;margin:0 0 10px;color:var(--mut);font-weight:600}
-input,select{font:inherit;color:var(--tx);background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
-button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:#334155;color:var(--tx);font-weight:600}
-button.pri{background:var(--ac);color:#0b1222}button.ok{background:var(--ok);color:#052e12}button.ng{background:var(--ng);color:#fff}
-button:disabled{opacity:.35;cursor:not-allowed}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
-.rules{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-.rule{border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:#0b1222}
-.rule.sel{border-color:var(--ac);box-shadow:0 0 0 2px #38bdf855}.rule b{display:block}.rule small{color:var(--mut);font-size:12px;line-height:1.5}
-.cat{font-size:11px;color:var(--ac)}
-.pcard{position:relative;border-radius:16px;padding:14px 12px 12px;background:var(--card);border:2px solid var(--line);text-align:center;transition:.2s}
-.pcard .nm{font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard .mn{font-size:44px;font-weight:800;line-height:1.1;margin:6px 0;font-variant-numeric:tabular-nums}
-.pcard .sb{color:var(--mut);font-size:13px;min-height:18px}
-.pcard .bt{display:flex;gap:6px;margin-top:10px}.pcard .bt button{flex:1;font-size:22px;padding:10px 0}
-.pcard.win{border-color:var(--win);background:linear-gradient(160deg,#3b2f05,#1e293b)}.pcard.lose{opacity:.45;filter:grayscale(.8)}
-.pcard.rest{border-color:var(--rest)}.pcard.rwin{box-shadow:0 0 0 3px #facc1566}.pcard.rlose{box-shadow:0 0 0 3px #ef444466}
-.badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:800;padding:3px 10px;border-radius:99px;white-space:nowrap}
-.b-win{background:var(--win);color:#3b2f05}.b-lose{background:var(--ng)}.b-rest{background:var(--rest);color:#1e1b4b}.b-reach{background:#f97316;color:#fff}
-.bar{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#0b1222ee;border-top:1px solid var(--line);flex-wrap:wrap;justify-content:center}
-.bar button{min-width:96px}
-.log{font-size:13px;color:var(--mut);max-height:140px;overflow:auto;line-height:1.7}
-.banner{text-align:center;font-weight:800;font-size:20px;margin:0 0 12px;padding:10px;border-radius:12px;background:#0b1222;border:1px solid var(--line)}
-.timer{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
-.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
-.modal.on{display:flex}.modal .box{max-width:420px;width:100%}
-.plist .it{display:flex;gap:6px;margin-bottom:6px}.plist .it input{flex:1}.plist .it .v{max-width:70px}
-.muted{color:var(--mut);font-size:13px;line-height:1.6}.hide{display:none!important}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111827;border:1px solid var(--line);padding:10px 16px;border-radius:10px;z-index:30;opacity:0;transition:.3s;pointer-events:none}.toast.on{opacity:1}
-.big .pcard .mn{font-size:72px}.big .grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
-label.ck{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mut)}label.ck input{width:auto}
+:root{--bg:#f6f7fb;--card:#fff;--line:#e5e7eb;--tx:#111827;--mut:#6b7280;--ac:#4f46e5;--acs:#eef2ff;--ok:#10b981;--ng:#f43f5e;--win:#f59e0b;--rest:#8b5cf6;--sh:0 1px 2px #0000000d,0 4px 14px #0000000a}
+@media (prefers-color-scheme:dark){:root{--bg:#0b0f19;--card:#151b2b;--line:#263045;--tx:#f3f4f6;--mut:#9ca3af;--acs:#1e1b4b;--sh:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,"Hiragino Sans","Noto Sans JP",sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{font:inherit;color:var(--tx)}
+.hide{display:none!important}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 110px}
+.top{display:flex;align-items:center;gap:10px;padding:14px 16px;max-width:720px;margin:0 auto}
+.top h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.04em;flex:1}
+.back{width:38px;height:38px;border-radius:12px;background:var(--card);box-shadow:var(--sh);font-size:20px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--card);box-shadow:var(--sh);font-size:13px;font-weight:700;white-space:nowrap}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:#9ca3af}.chip.on .dot{background:var(--ok)}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:18px;margin-bottom:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border-radius:14px;font-weight:800;font-size:16px;background:var(--acs);color:var(--ac)}
+.btn.pri{background:var(--ac);color:#fff}.btn:disabled{opacity:.4}
+.field{width:100%;padding:15px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);font-size:16px;outline:none}
+.field:focus{border-color:var(--ac)}
+.lbl{font-size:13px;color:var(--mut);font-weight:700;margin:0 0 8px}
+.hero{text-align:center;padding:26px 0 10px}.hero .logo{font-size:30px;font-weight:900;letter-spacing:.06em}.hero p{color:var(--mut);margin:6px 0 0;font-size:14px}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:6px 0 14px}.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+/* stepper header */
+.steps{display:flex;gap:6px;margin:0 0 14px}.steps div{flex:1;height:5px;border-radius:9px;background:var(--line)}.steps div.on{background:var(--ac)}
+/* rule picker */
+.search{position:sticky;top:0;z-index:3;background:var(--bg);padding-bottom:10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chips button{padding:8px 14px;border-radius:99px;background:var(--card);box-shadow:var(--sh);font-size:13px;font-weight:700;white-space:nowrap;color:var(--mut)}
+.chips button.on{background:var(--ac);color:#fff}
+.rlist{background:var(--card);border-radius:18px;box-shadow:var(--sh);overflow:hidden}
+.ritem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ritem:last-child{border-bottom:0}.ritem .ic{width:40px;height:40px;border-radius:12px;background:var(--acs);color:var(--ac);display:grid;place-items:center;font-weight:900;font-size:13px;flex:none}
+.ritem b{display:block;font-size:15px}.ritem small{color:var(--mut);font-size:12.5px}.ritem .ar{margin-left:auto;color:var(--mut)}
+.ritem.sel{background:var(--acs)}
+/* stepper inputs */
+.prm{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.prm:last-child{border-bottom:0}
+.prm span{font-weight:700;font-size:15px}
+.stp{display:flex;align-items:center;gap:4px}.stp button{width:40px;height:40px;border-radius:12px;background:var(--acs);color:var(--ac);font-size:22px;font-weight:800}
+.stp output{min-width:46px;text-align:center;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);gap:12px}.tog:last-child{border-bottom:0}.tog span{font-size:14px;font-weight:600}
+.sw{position:relative;width:50px;height:30px;flex:none}.sw input{opacity:0;width:0;height:0}.sw i{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:.2s}.sw i:before{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #0003}.sw input:checked+i{background:var(--ac)}.sw input:checked+i:before{transform:translateX(20px)}
+.desc{background:var(--acs);color:var(--tx);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.7;margin-bottom:14px}
+/* members */
+.mem{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}.mem:last-child{border-bottom:0}
+.mem .no{width:28px;height:28px;border-radius:50%;background:var(--acs);color:var(--ac);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.mem input{flex:1;border:0;background:none;font-size:16px;padding:8px 4px;outline:none;min-width:0}
+.mem .v{width:58px;flex:none;border:1.5px solid var(--line);border-radius:10px;text-align:center;padding:6px}
+.mem .x{width:34px;height:34px;border-radius:10px;color:var(--mut);font-size:18px;flex:none}
+.guest{display:inline-flex;gap:6px;align-items:center;margin:0 8px 8px 0;padding:8px 12px;border-radius:99px;background:var(--acs);color:var(--ac);font-weight:700;font-size:13px}
+/* bottom action */
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.foot .in{max-width:720px;margin:0 auto;display:flex;gap:10px}
+/* game */
+.gbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.qno{font-size:13px;font-weight:800;color:var(--mut)}.rname{font-size:13px;font-weight:700;color:var(--mut);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alert{border-radius:14px;padding:11px 14px;font-weight:800;font-size:14px;margin-bottom:12px;background:#fff7ed;color:#c2410c}
+.alert.end{background:#fef3c7;color:#92400e;font-size:16px;text-align:center}
+@media (prefers-color-scheme:dark){.alert{background:#431407;color:#fdba74}.alert.end{background:#422006;color:#fcd34d}}
+.players{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+.pl{position:relative;background:var(--card);border-radius:20px;box-shadow:var(--sh);overflow:hidden;border:2.5px solid transparent;transition:transform .15s}
+.pl .hd{display:flex;align-items:center;gap:6px;padding:12px 12px 0}.pl .nm{font-weight:800;font-size:15px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl .tag{font-size:11px;font-weight:900;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.pl .mn{font-size:46px;font-weight:900;text-align:center;line-height:1.05;padding:6px 8px 0;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pl .sb{text-align:center;color:var(--mut);font-size:12.5px;min-height:18px;padding:2px 8px 10px;font-weight:600}
+.pl .bt{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.pl .bt button{padding:16px 0;font-size:24px;font-weight:900}.pl .bt .o{color:var(--ok)}.pl .bt .x{color:var(--ng);border-left:1px solid var(--line)}
+.pl .bt button:active{background:var(--acs)}.pl .bt button:disabled{opacity:.25}
+.pl.me{border-color:var(--ac)}
+.pl.win{border-color:var(--win)}.pl.win .mn{color:var(--win)}.pl.lose{opacity:.45}.pl.rest{border-color:var(--rest)}
+.pl.rw .tag{background:#ffedd5;color:#c2410c}.t-win{background:var(--win);color:#fff}.t-lose{background:var(--ng);color:#fff}.t-rest{background:var(--rest);color:#fff}.t-reach{background:#fb923c;color:#fff}
+.pl.pop{animation:pop .35s}@keyframes pop{50%{transform:scale(1.05)}}
+.timer{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
+.gfoot{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:10px;max-width:720px;margin:0 auto}
+.gfoot button{padding:15px 0;border-radius:14px;background:var(--card);box-shadow:var(--sh);font-weight:800;font-size:15px}
+.gfoot .thr{background:var(--ac);color:#fff}
+.log{font-size:13px;color:var(--mut);line-height:1.8;max-height:160px;overflow:auto}
+/* sheet */
+.mask{position:fixed;inset:0;background:#0006;z-index:30;opacity:0;pointer-events:none;transition:.2s}.mask.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;transform:translateY(105%);transition:.25s;max-height:85vh;overflow:auto}
+.sheet.on{transform:none}.sheet .in{max-width:720px;margin:0 auto;background:var(--card);border-radius:22px 22px 0 0;padding:10px 18px calc(20px + env(safe-area-inset-bottom))}
+.sheet .grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sheet h3{margin:0 0 12px;font-size:17px}
+.mi{display:flex;align-items:center;gap:14px;width:100%;padding:14px 4px;border-bottom:1px solid var(--line);font-size:15px;font-weight:700;text-align:left}.mi:last-child{border-bottom:0}.mi .e{width:26px;text-align:center;font-size:18px}
+.mi.danger{color:var(--ng)}
+.pickg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pickg button{padding:16px;border-radius:14px;background:var(--acs);font-weight:800}
+.roomid{font-size:44px;font-weight:900;letter-spacing:.12em;text-align:center;font-variant-numeric:tabular-nums;margin:6px 0 14px}
+.toast{position:fixed;left:50%;top:16px;transform:translate(-50%,-140%);z-index:50;background:#111827;color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;font-size:14px;transition:.3s;max-width:90vw}
+.toast.on{transform:translate(-50%,0)}
+.celebrate{position:fixed;inset:0;z-index:40;display:grid;place-items:center;pointer-events:none;opacity:0;transition:.25s}
+.celebrate.on{opacity:1}.celebrate div{background:var(--win);color:#fff;padding:22px 34px;border-radius:24px;font-size:28px;font-weight:900;text-align:center;box-shadow:0 10px 40px #f59e0b66;transform:scale(.8);transition:.25s}.celebrate.on div{transform:none}
+.celebrate small{display:block;font-size:14px;opacity:.9}
+body.big .players{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}body.big .pl .mn{font-size:76px}body.big .wrap,body.big .top,body.big .gfoot{max-width:1400px}
 </style></head><body>
-<header><h1>SCORE ROOM</h1><span class="sp"></span><span id="roomPill" class="pill hide"></span><span id="netPill" class="pill">ローカル</span></header>
-<main>
-<!-- ホーム -->
+
+<!-- HOME -->
 <section id="vHome">
- <div class="box"><h2>ルームに参加</h2>
-  <div class="row"><input id="jName" placeholder="ニックネーム"><input id="jId" placeholder="ルームID（6桁）" inputmode="numeric" maxlength="6"></div>
-  <div class="row" style="margin-top:8px"><button class="pri" id="bJoin">参加する</button></div></div>
- <div class="box"><h2>新しくルームを作成</h2>
-  <p class="muted">作成した端末がホストになります。ルームIDを共有すると、参加者のスマホにも得点がリアルタイムで表示されます。</p>
-  <div class="row"><button class="pri" id="bCreate">ルームを作成</button><button id="bLocal">この端末だけで使う</button></div></div>
- <p class="muted">21種類のルールに対応。履歴から毎回計算し直すので「元に戻す」は何回でも可能です。</p>
+ <div class="wrap">
+  <div class="hero"><div class="logo">SCORE ROOM</div><p>みんなのスマホで得点を共有。21ルール対応。</p></div>
+  <div class="card">
+   <p class="lbl">ルームに参加</p>
+   <input class="field" id="jName" placeholder="ニックネーム" autocomplete="nickname" style="margin-bottom:10px">
+   <input class="field" id="jId" placeholder="ルームID（6桁）" inputmode="numeric" maxlength="6" style="margin-bottom:12px;letter-spacing:.2em;font-weight:800">
+   <button class="btn pri" id="bJoin">参加する</button>
+  </div>
+  <div class="or">または</div>
+  <button class="btn pri" id="bCreate" style="margin-bottom:10px">＋ ルームを作成</button>
+  <button class="btn" id="bLocal">この端末だけで使う</button>
+  <button class="btn hide" id="bResume" style="margin-top:10px">前回の続きから</button>
+ </div>
 </section>
-<!-- 設定 -->
+
+<!-- SETUP -->
 <section id="vSetup" class="hide">
- <div class="box"><h2>ルール</h2><div id="ruleList" class="rules"></div></div>
- <div class="box"><h2 id="ruleTitle">設定</h2><p class="muted" id="ruleDesc"></p><div id="paramBox" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div>
-  <div class="grid" style="margin-top:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
-   <div><div class="muted">勝ち抜け人数（0=無制限）</div><input type="number" id="winLimit" min="0" value="0"></div></div>
-  <div style="margin-top:10px" class="row">
-   <label class="ck"><input type="checkbox" id="autoRemain" checked>残りが枠以下になったら全員勝ち抜け</label>
-   <label class="ck"><input type="checkbox" id="wrongEnds">誤答でその問題を終了（1問1解答）</label></div></div>
- <div class="box"><h2>プレイヤー</h2><div id="plist" class="plist"></div>
-  <div class="row"><button id="bAddP">＋ プレイヤー追加</button><button id="bAddMe" class="hide">参加者を取り込む</button></div></div>
- <div class="row"><button class="pri" id="bStart">この設定で開始</button></div>
+ <div class="top"><button class="back" id="sBack">‹</button><h1 id="sTitle">ルールを選ぶ</h1><span class="chip hide" id="sRoom"></span></div>
+ <div class="wrap" style="padding-top:0">
+  <div class="steps"><div id="st1"></div><div id="st2"></div><div id="st3"></div></div>
+  <!-- step1 -->
+  <div id="step1">
+   <div class="search"><input class="field" id="rSearch" placeholder="ルール名で検索（例：7○3×、updown）" style="margin-bottom:10px"><div class="chips" id="rCats"></div></div>
+   <div class="rlist" id="rList"></div>
+  </div>
+  <!-- step2 -->
+  <div id="step2" class="hide">
+   <div class="desc" id="rDesc"></div>
+   <div class="card" id="prmCard"><p class="lbl">ルール設定</p><div id="prmBox"></div></div>
+   <div class="card"><p class="lbl">進行</p>
+    <div class="prm"><span>勝ち抜け人数<br><small style="color:var(--mut);font-weight:500">0 = 制限なし</small></span><div class="stp" data-k="winLimit"></div></div>
+    <label class="tog"><span>残りが枠以下になったら全員勝ち抜け</span><span class="sw"><input type="checkbox" id="autoRemain"><i></i></span></label>
+    <label class="tog"><span>誤答が出たら次の問題へ（1問1解答）</span><span class="sw"><input type="checkbox" id="wrongEnds"><i></i></span></label>
+   </div>
+  </div>
+  <!-- step3 -->
+  <div id="step3" class="hide">
+   <div class="card hide" id="guestCard"><p class="lbl">ルームに来ている人（タップで追加）</p><div id="guestBox"></div></div>
+   <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><p class="lbl" style="margin:0">プレイヤー</p><div class="stp" id="pCount"></div></div>
+    <div id="memBox"></div></div>
+  </div>
+ </div>
+ <div class="foot"><div class="in"><button class="btn pri" id="sNext">次へ</button></div></div>
 </section>
-<!-- 試合 -->
+
+<!-- GAME -->
 <section id="vGame" class="hide">
- <div id="banner" class="banner"></div>
- <div class="row" style="margin-bottom:12px"><span class="pill" id="qPill">Q1</span><span class="pill" id="rulePill"></span><span id="timerBox" class="hide" style="text-align:right"><span class="timer" id="timer">00:00</span></span></div>
- <div id="pgrid" class="grid"></div>
- <div class="box" style="margin-top:14px"><h2>ログ</h2><div class="log" id="log"></div></div>
+ <div class="top"><h1>SCORE ROOM</h1><span class="chip hide" id="tChip"><span class="timer" id="timer">00:00</span></span><button class="chip" id="gRoom"><span class="dot"></span><span id="gRoomTx">ローカル</span></button></div>
+ <div class="wrap" style="padding-top:0">
+  <div class="gbar"><span class="qno" id="qNo">Q1</span><span class="rname" id="rName"></span></div>
+  <div id="alert" class="alert hide"></div>
+  <div class="players" id="players"></div>
+  <div class="card" style="margin-top:16px"><p class="lbl">ログ</p><div class="log" id="log"></div></div>
+ </div>
+ <div class="foot"><div class="gfoot"><button id="gUndo">↶ 戻す</button><button class="thr" id="gThru">スルー ›</button><button id="gMenu">⋯ メニュー</button></div></div>
 </section>
-</main>
-<div class="bar hide" id="gbar">
- <button id="bThrough">スルー（次の問題）</button><button id="bUndo">元に戻す</button><button id="bTimer">タイマー</button><button id="bBig">大画面</button><button id="bShare">共有</button><button id="bSet">設定</button>
-</div>
-<div class="modal" id="mPick"><div class="box"><h2 id="pickTitle"></h2><div id="pickList" class="grid" style="grid-template-columns:1fr 1fr"></div><div class="row" style="margin-top:10px"><button id="pickCancel">キャンセル</button></div></div></div>
+
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet"><div class="in"><div class="grab"></div><div id="sheetBody"></div></div></div>
 <div class="toast" id="toast"></div>
+<div class="celebrate" id="cele"><div id="celeTx"></div></div>
+
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 // ===== ルール定義 =====
@@ -229,116 +307,171 @@ function replay(cfg,actions){
 
 </script>
 <script>
-const $=s=>document.querySelector(s);
+const SHORT={free:'勝敗なし。点数だけ数える',nomx:'N回正解で抜け、M回誤答で失格',rentou:'連続正解で+2（abc）',nomrest:'誤答でM問休み',newyork:'正解+1／誤答−1',updown:'誤答で0に戻る',by:'正解数×(N−誤答数)',freeze:'n回目の誤答でn回休み',swedish:'正解数が多いほど誤答が重い',divide:'誤答で得点を割る',backstream:'n回目の誤答で−n',square:'奇数問×偶数問の正解数',rengoto:'連続誤答で2×',hits:'n連答目でn点',attack:'正解で他人を削る',variables:'自分で変動値を決める',triple:'7○3×を3セット先取',timerace:'時間内の得点勝負',lucky:'点数とダメージがランダム',melon:'指名した相手のライフを削る',koban:'2番目に押した人も得点'};
+const ICON={free:'±',nomx:'○×',rentou:'連',nomrest:'休',newyork:'NY',updown:'↺',by:'by',freeze:'❄',swedish:'SW',divide:'÷',backstream:'BS',square:'□',rengoto:'誤',hits:'⚡',attack:'⚔',variables:'V',triple:'777',timerace:'⏱',lucky:'🎲',melon:'🍈',koban:'🐟'};
+const PRESETS=[['nomx',{N:7,M:3},'7○3×'],['nomx',{N:5,M:2},'5○2×'],['rentou',{N:7,M:3},'連答つき7○3×'],['updown',{N:10,M:2},'10updown'],['by',{N:10},'10by10'],['freeze',{N:10},'Freeze10'],['swedish',{N:10,M:10},'Swedish10'],['attack',{L:15,a:1,b:2},'アタサバ']];
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
-let cfg=null,actions=[],mode='local',role='host',peer=null,conns=[],hostConn=null,myName='',allowGuest=true,timerEnd=null,timerLeft=null,timerIv=null,guestNames=[];
-const save=()=>{if(role==='host')localStorage.setItem('scoreroom',JSON.stringify({cfg,actions}))};
-const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1800)};
-const show=v=>{['vHome','vSetup','vGame'].forEach(x=>$('#'+x).classList.toggle('hide',x!==v));$('#gbar').classList.toggle('hide',v!=='vGame')};
+let cfg=null,actions=[],mode='local',role='host',peer=null,conns=[],hostConn=null,myName='',allowGuest=true,roomId='',guestNames=[],step=1,cat='すべて',prevRes={},editing=false;
+let timerEnd=null,timerLeft=null,timerIv=null;
+const show=v=>['vHome','vSetup','vGame'].forEach(x=>$('#'+x).classList.toggle('hide',x!==v));
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2000)};
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 const canEdit=()=>role==='host'||allowGuest;
-function defaultCfg(){return{rule:'nomx',params:{},players:[{id:uid(),name:'プレイヤー1'},{id:uid(),name:'プレイヤー2'},{id:uid(),name:'プレイヤー3'}],winLimit:0,autoRemain:true,wrongEnds:false,seed:Math.floor(Math.random()*1e9)}}
-// ---- 設定画面 ----
+const save=()=>{if(role==='host')localStorage.setItem('scoreroom2',JSON.stringify({cfg,actions}))};
+function defaultCfg(){return{rule:'nomx',params:{N:7,M:3},players:[1,2,3,4].map(i=>({id:uid(),name:'プレイヤー'+i})),winLimit:0,autoRemain:true,wrongEnds:false,seed:Math.floor(Math.random()*1e9)}}
+// ---------- sheet ----------
+function openSheet(html,bind){$('#sheetBody').innerHTML=html;$('#mask').classList.add('on');$('#sheet').classList.add('on');bind&&bind($('#sheetBody'))}
+function closeSheet(){$('#mask').classList.remove('on');$('#sheet').classList.remove('on')}
+$('#mask').onclick=closeSheet;
+function ask(title,msg,okTx,cb,danger){openSheet(`<h3>${title}</h3><p style="color:var(--mut);font-size:14px;line-height:1.7;margin:0 0 16px">${msg}</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn" data-x>やめる</button><button class="btn pri" data-ok style="${danger?'background:var(--ng)':''}">${okTx}</button></div>`,b=>{b.querySelector('[data-x]').onclick=closeSheet;b.querySelector('[data-ok]').onclick=()=>{closeSheet();cb()}})}
+// ---------- stepper widget ----------
+function stepper(el,get,set,min=0,max=999){el.innerHTML='<button>−</button><output></output><button>＋</button>';const o=el.querySelector('output');const r=()=>o.textContent=get();r();
+ const [m,p]=el.querySelectorAll('button');let iv;const go=d=>{set(Math.min(max,Math.max(min,get()+d)));r()};
+ [[m,-1],[p,1]].forEach(([b,d])=>{b.onclick=()=>go(d);b.onpointerdown=()=>{iv=setTimeout(function rep(){go(d);iv=setTimeout(rep,80)},450)};b.onpointerup=b.onpointerleave=()=>clearTimeout(iv)})}
+// ---------- setup ----------
+function gotoSetup(s){step=s;show('vSetup');renderSetup()}
 function renderSetup(){
- const rl=$('#ruleList');rl.innerHTML='';
- for(const k in RULES){const R=RULES[k];const d=document.createElement('div');d.className='rule'+(cfg.rule===k?' sel':'');
-  d.innerHTML=`<span class="cat">${R.cat}</span><b>${R.name}</b><small>${R.desc}</small>`;d.onclick=()=>{cfg.rule=k;cfg.params={};renderSetup()};rl.appendChild(d)}
- const R=RULES[cfg.rule];$('#ruleTitle').textContent=R.name+' の設定';$('#ruleDesc').textContent=R.desc;
- const pb=$('#paramBox');pb.innerHTML='';
- R.params.forEach(x=>{if(cfg.params[x.k]==null)cfg.params[x.k]=x.d;const w=document.createElement('div');w.innerHTML=`<div class="muted">${x.l}</div>`;const i=document.createElement('input');i.type='number';i.value=cfg.params[x.k];i.oninput=()=>cfg.params[x.k]=Number(i.value);w.appendChild(i);pb.appendChild(w)});
- $('#winLimit').value=cfg.winLimit;$('#autoRemain').checked=cfg.autoRemain;$('#wrongEnds').checked=cfg.wrongEnds;
- const pl=$('#plist');pl.innerHTML='';
- cfg.players.forEach((p,i)=>{const it=document.createElement('div');it.className='it';
-  const n=document.createElement('input');n.value=p.name;n.oninput=()=>p.name=n.value;it.appendChild(n);
-  if(R.pvar){const v=document.createElement('input');v.className='v';v.type='number';v.title=R.pvar.l;v.value=p.v??R.pvar.d;v.oninput=()=>p.v=Number(v.value);it.appendChild(v)}
-  const up=document.createElement('button');up.textContent='↑';up.onclick=()=>{if(i>0){[cfg.players[i-1],cfg.players[i]]=[cfg.players[i],cfg.players[i-1]];renderSetup()}};it.appendChild(up);
-  const del=document.createElement('button');del.textContent='✕';del.onclick=()=>{cfg.players.splice(i,1);renderSetup()};it.appendChild(del);pl.appendChild(it)});
- $('#bAddMe').classList.toggle('hide',!guestNames.length);
-}
-$('#winLimit').oninput=e=>cfg.winLimit=Number(e.target.value);$('#autoRemain').onchange=e=>cfg.autoRemain=e.target.checked;$('#wrongEnds').onchange=e=>cfg.wrongEnds=e.target.checked;
-$('#bAddP').onclick=()=>{cfg.players.push({id:uid(),name:'プレイヤー'+(cfg.players.length+1)});renderSetup()};
-$('#bAddMe').onclick=()=>{guestNames.forEach(n=>{if(!cfg.players.some(p=>p.name===n))cfg.players.push({id:uid(),name:n})});renderSetup()};
-$('#bStart').onclick=()=>{
- if(actions.length&&!confirm('得点をリセットして開始しますか？\n（キャンセルで得点を残したままルールだけ変更）')){}else actions=[];
- cfg.seed=cfg.seed||Math.floor(Math.random()*1e9);commit();show('vGame')};
-// ---- 試合画面 ----
-function render(){
- if(!cfg)return;const R=RULES[cfg.rule],P=cfg.params;const st=replay(cfg,actions);
- $('#qPill').textContent='Q'+st.q;$('#rulePill').textContent=R.name+' '+R.params.map(x=>x.k+'='+P[x.k]).join(' ');
- const g=$('#pgrid');g.innerHTML='';
- const reachW=st.players.filter(p=>p.reach.win).map(p=>p.name),reachL=st.players.filter(p=>p.reach.lose).map(p=>p.name);
- let ban='';if(st.ended){const w=st.players.filter(p=>p.res==='win').sort((a,b)=>a.rank-b.rank).map(p=>p.name);ban='終了！ '+(w.length?w.join('・')+' 勝ち抜け':'')}
- else{const a=[];if(reachW.length)a.push(reachW.join('、')+' リーチ');if(reachL.length)a.push(reachL.join('、')+' 失格リーチ');ban=a.join('　/　')}
- $('#banner').textContent=ban;$('#banner').classList.toggle('hide',!ban);
- st.players.forEach(p=>{
-  const v=R.view(p,P,st);const d=document.createElement('div');
-  const rest=p.rest>0&&!p.res;const blocked=(R.blocked&&R.blocked(p,P))||p.tried===st.q;
-  d.className='pcard'+(p.res?' '+p.res:'')+(rest?' rest':'')+(p.reach.win?' rwin':'')+(p.reach.lose?' rlose':'');
-  let badge='';if(p.res==='win')badge=`<span class="badge b-win">勝ち抜け ${p.rank}位</span>`;else if(p.res==='lose')badge=`<span class="badge b-lose">失格</span>`;else if(rest)badge=`<span class="badge b-rest">休み ${p.rest}</span>`;else if(p.reach.win||p.reach.lose)badge=`<span class="badge b-reach">${p.reach.win?'リーチ':'失格リーチ'}</span>`;
-  d.innerHTML=`${badge}<div class="nm">${esc(p.name)}</div><div class="mn">${v.main}</div><div class="sb">${v.sub||''}</div>`;
-  if(canEdit()){const bt=document.createElement('div');bt.className='bt';
-   const c=document.createElement('button');c.className='ok';c.textContent='○';const w=document.createElement('button');w.className='ng';w.textContent='×';
-   const dis=!!p.res||rest||blocked||st.ended;c.disabled=w.disabled=dis;
-   c.onclick=()=>act('c',p.id);w.onclick=()=>act('w',p.id);bt.append(c,w);d.appendChild(bt)}
-  g.appendChild(d)});
- $('#log').innerHTML=st.log.slice().reverse().map(esc).join('<br>');
- $('#bThrough').disabled=$('#bUndo').disabled=!canEdit();$('#bSet').classList.toggle('hide',role!=='host');
- $('#timerBox').classList.toggle('hide',timerLeft==null&&!timerEnd);
-}
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function act(t,p){const R=RULES[cfg.rule];
- if(p&&R.pick&&t==='c'&&R.pick==='target')return pick('攻撃する相手を選択',p,false,id=>send({t,p,target:id}));
- if(p&&R.pick==='second')return pick('セカンド（2番目に押した人）',p,true,id=>send({t,p,second:id}));
+ ['st1','st2','st3'].forEach((id,i)=>$('#'+id).classList.toggle('on',i<step));
+ [1,2,3].forEach(i=>$('#step'+i).classList.toggle('hide',i!==step));
+ $('#sTitle').textContent=['ルールを選ぶ','ルール設定','プレイヤー'][step-1];
+ $('#sNext').textContent=step===3?(editing&&actions.length?'変更を反映':'スタート'):'次へ';
+ $('#sNext').parentElement.parentElement.classList.toggle('hide',step===1);
+ if(roomId){$('#sRoom').textContent='ID '+roomId;$('#sRoom').classList.remove('hide')}
+ if(step===1)renderRules();if(step===2)renderParams();if(step===3)renderMembers();
+ window.scrollTo(0,0)}
+function renderRules(){
+ const cats=['すべて','定番',...new Set(Object.values(RULES).map(r=>r.cat))];
+ $('#rCats').innerHTML=cats.map(c=>`<button class="${c===cat?'on':''}">${c}</button>`).join('');
+ [...$('#rCats').children].forEach((b,i)=>b.onclick=()=>{cat=cats[i];renderRules()});
+ const q=$('#rSearch').value.trim().toLowerCase().replace(/[○o]/g,'○').replace(/[×x]/g,'×');
+ let items=[];
+ if(cat==='定番'&&!q)items=PRESETS.map(([k,p,n])=>({k,p,n,s:SHORT[k]}));
+ else for(const k in RULES){const R=RULES[k];if(cat!=='すべて'&&cat!=='定番'&&R.cat!==cat)continue;
+   const hay=(R.name+SHORT[k]+R.desc+k).toLowerCase();if(q&&!hay.includes(q)&&!PRESETS.some(p=>p[0]===k&&p[2].toLowerCase().includes(q)))continue;items.push({k,n:R.name,s:SHORT[k]})}
+ $('#rList').innerHTML=items.map((it,i)=>`<button class="ritem ${cfg.rule===it.k&&!it.p?'sel':''}" data-i="${i}"><span class="ic">${ICON[it.k]}</span><span><b>${esc(it.n)}</b><small>${esc(it.s)}</small></span><span class="ar">›</span></button>`).join('')||'<p style="padding:20px;color:var(--mut);text-align:center">見つかりません</p>';
+ [...$('#rList').children].forEach(b=>{if(!b.dataset.i)return;b.onclick=()=>{const it=items[b.dataset.i];
+  if(cfg.rule!==it.k){cfg.rule=it.k;cfg.params={}}
+  const R=RULES[it.k];R.params.forEach(x=>{if(cfg.params[x.k]==null)cfg.params[x.k]=x.d});if(it.p)Object.assign(cfg.params,it.p);gotoSetup(2)}})}
+$('#rSearch').oninput=renderRules;
+function renderParams(){const R=RULES[cfg.rule];
+ $('#rDesc').innerHTML=`<b>${esc(R.name)}</b><br>${esc(R.desc)}`;
+ $('#prmCard').classList.toggle('hide',!R.params.length);
+ $('#prmBox').innerHTML=R.params.map(x=>`<div class="prm"><span>${esc(x.l)}</span><div class="stp" data-p="${x.k}"></div></div>`).join('');
+ R.params.forEach(x=>{if(cfg.params[x.k]==null)cfg.params[x.k]=x.d;stepper($(`[data-p="${x.k}"]`),()=>cfg.params[x.k],v=>cfg.params[x.k]=v,x.k==='M'&&cfg.rule==='newyork'?0:(x.min??(['b','M','a'].includes(x.k)&&cfg.rule==='free'?0:1)),x.max??999)});
+ stepper($('[data-k="winLimit"]'),()=>cfg.winLimit,v=>cfg.winLimit=v,0,99);
+ $('#autoRemain').checked=cfg.autoRemain;$('#wrongEnds').checked=cfg.wrongEnds}
+$('#autoRemain').onchange=e=>cfg.autoRemain=e.target.checked;$('#wrongEnds').onchange=e=>cfg.wrongEnds=e.target.checked;
+function renderMembers(){const R=RULES[cfg.rule];
+ const gs=guestNames.filter(n=>!cfg.players.some(p=>p.name===n));
+ $('#guestCard').classList.toggle('hide',!gs.length);
+ $('#guestBox').innerHTML=gs.map(n=>`<button class="guest">＋ ${esc(n)}</button>`).join('');
+ [...$('#guestBox').children].forEach((b,i)=>b.onclick=()=>{const blank=cfg.players.find(p=>/^プレイヤー\d+$/.test(p.name));if(blank)blank.name=gs[i];else cfg.players.push({id:uid(),name:gs[i]});renderMembers()});
+ stepper($('#pCount'),()=>cfg.players.length,v=>{while(cfg.players.length<v)cfg.players.push({id:uid(),name:'プレイヤー'+(cfg.players.length+1)});while(cfg.players.length>v)cfg.players.pop();renderMembers()},1,30);
+ $('#memBox').innerHTML=cfg.players.map((p,i)=>`<div class="mem"><span class="no">${i+1}</span><input value="${esc(p.name)}" data-i="${i}" enterkeyhint="next">${R.pvar?`<input class="v" type="number" value="${p.v??R.pvar.d}" data-v="${i}" title="${R.pvar.l}">`:''}<button class="x" data-d="${i}">✕</button></div>`).join('');
+ $('#memBox').querySelectorAll('[data-i]').forEach(inp=>{inp.onfocus=()=>{if(/^プレイヤー\d+$/.test(inp.value))inp.select()};inp.oninput=()=>cfg.players[inp.dataset.i].name=inp.value;
+  inp.onkeydown=e=>{if(e.key==='Enter'){const n=$('#memBox').querySelector(`[data-i="${+inp.dataset.i+1}"]`);n?n.focus():inp.blur()}}});
+ $('#memBox').querySelectorAll('[data-v]').forEach(inp=>inp.oninput=()=>cfg.players[inp.dataset.v].v=Number(inp.value));
+ $('#memBox').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{if(cfg.players.length>1){cfg.players.splice(b.dataset.d,1);renderMembers()}})}
+$('#sBack').onclick=()=>{if(step>1)gotoSetup(step-1);else if(editing&&cfg){editing=false;show('vGame');render()}else leave()};
+$('#sNext').onclick=()=>{if(step<3)return gotoSetup(step+1);
+ cfg.players.forEach((p,i)=>{if(!p.name.trim())p.name='プレイヤー'+(i+1)});
+ const go=()=>{editing=false;prevRes={};commit();show('vGame')};
+ if(editing&&actions.length)ask('得点はどうしますか？','ルールやメンバーを変えると、今の得点の計算結果が変わることがあります。','リセットして開始',()=>{actions=[];go()});
+ else{actions=[];go()}};
+// ---------- game ----------
+function render(){if(!cfg)return;const R=RULES[cfg.rule],P=cfg.params,st=replay(cfg,actions);
+ $('#qNo').textContent='Q'+st.q;$('#rName').textContent=R.name+'　'+R.params.map(x=>x.k+'='+P[x.k]).join(' ');
+ const rw=st.players.filter(p=>p.reach.win).map(p=>p.name),rl=st.players.filter(p=>p.reach.lose).map(p=>p.name);
+ const al=$('#alert');al.className='alert';
+ if(st.ended){const w=st.players.filter(p=>p.res==='win').sort((a,b)=>a.rank-b.rank).map(p=>p.name);al.classList.add('end');al.textContent='🏁 終了'+(w.length?'　'+w.join('・')+' 勝ち抜け':'')}
+ else{const a=[];if(rw.length)a.push(rw.join('、')+' リーチ');if(rl.length)a.push(rl.join('、')+' 失格リーチ');if(a.length)al.textContent=a.join('　｜　');else al.classList.add('hide')}
+ const box=$('#players');box.innerHTML='';
+ st.players.forEach(p=>{const v=R.view(p,P,st),rest=p.rest>0&&!p.res,blocked=(R.blocked&&R.blocked(p,P))||p.tried===st.q;
+  let tag='';if(p.res==='win')tag=`<span class="tag t-win">${p.rank}位 抜け</span>`;else if(p.res==='lose')tag='<span class="tag t-lose">失格</span>';else if(rest)tag=`<span class="tag t-rest">休み${p.rest}</span>`;else if(p.reach.win||p.reach.lose)tag=`<span class="tag t-reach">${p.reach.win?'リーチ':'失格リーチ'}</span>`;
+  const d=document.createElement('div');d.className='pl'+(p.res?' '+p.res:'')+(rest?' rest':'')+(role==='guest'&&p.name===myName?' me':'');
+  d.innerHTML=`<div class="hd"><span class="nm">${esc(p.name)}</span>${tag}</div><div class="mn">${v.main}</div><div class="sb">${esc(v.sub||'')}</div>`;
+  if(canEdit()){const dis=!!p.res||rest||blocked||st.ended;const bt=document.createElement('div');bt.className='bt';bt.innerHTML=`<button class="o" ${dis?'disabled':''}>○</button><button class="x" ${dis?'disabled':''}>×</button>`;
+   bt.children[0].onclick=()=>{d.classList.add('pop');act('c',p.id)};bt.children[1].onclick=()=>{d.classList.add('pop');act('w',p.id)};d.appendChild(bt)}
+  box.appendChild(d);
+  if(p.res==='win'&&prevRes[p.id]!=='win'&&Object.keys(prevRes).length)celebrate(p.name,p.rank+'位 勝ち抜け');
+  prevRes[p.id]=p.res||'-'});
+ $('#log').innerHTML=st.log.slice().reverse().map(esc).join('<br>')||'まだ記録はありません';
+ $('#gUndo').disabled=$('#gThru').disabled=!canEdit()||!actions.length&&false;
+ $('#gRoomTx').textContent=mode==='online'?(role==='host'?'ID '+roomId+'・'+conns.length+'人':'ID '+roomId):'ローカル';
+ $('#gRoom').classList.toggle('on',mode==='online')}
+function celebrate(n,s){$('#celeTx').innerHTML=`${esc(n)}<small>${s}</small>`;$('#cele').classList.add('on');buzz([60,40,60]);setTimeout(()=>$('#cele').classList.remove('on'),1400)}
+function act(t,p){const R=RULES[cfg.rule];buzz(t==='c'?20:[20,30,20]);
+ const others=replay(cfg,actions).players.filter(o=>o.id!==p&&!o.res);
+ if(t==='c'&&R.pick==='target')return pickP('誰を攻撃しますか？',others,false,id=>send({t,p,target:id}));
+ if(R.pick==='second')return pickP('2番目に押した人は？',others,true,id=>send({t,p,second:id}));
  send({t,p})}
-function pick(title,self,allowNone,cb){const st=replay(cfg,actions);$('#pickTitle').textContent=title;const l=$('#pickList');l.innerHTML='';
- st.players.filter(o=>o.id!==self&&!o.res).forEach(o=>{const b=document.createElement('button');b.textContent=o.name;b.onclick=()=>{close();cb(o.id)};l.appendChild(b)});
- if(allowNone){const b=document.createElement('button');b.className='pri';b.textContent='セカンドなし';b.onclick=()=>{close();cb(null)};l.appendChild(b)}
- const close=()=>$('#mPick').classList.remove('on');$('#pickCancel').onclick=close;$('#mPick').classList.add('on')}
-function send(a){if(role==='host'){actions.push(a);commit()}else if(hostConn)hostConn.send({type:'act',a})}
-$('#bThrough').onclick=()=>send({t:'s'});
-$('#bUndo').onclick=()=>{if(role==='host'){actions.pop();commit()}else hostConn&&hostConn.send({type:'undo'})};
-$('#bSet').onclick=()=>{renderSetup();show('vSetup')};
-$('#bBig').onclick=()=>document.body.classList.toggle('big');
-$('#bShare').onclick=()=>{if(mode!=='online'){toast('ローカルモードです（ルーム作成で共有できます）');return}
- const url=location.href.split('#')[0]+'#'+roomId;navigator.clipboard?.writeText(url);toast('参加リンクをコピーしました：ルームID '+roomId)};
-// ---- タイマー ----
-$('#bTimer').onclick=()=>{
- if(timerEnd){timerLeft=timerEnd-Date.now();timerEnd=null;clearInterval(timerIv);render();return}
- if(timerLeft==null){const m=prompt('タイマー（分）',cfg.params.m||5);if(!m)return;timerLeft=Number(m)*60000}
- timerEnd=Date.now()+timerLeft;timerLeft=null;clearInterval(timerIv);timerIv=setInterval(tick,250);tick();render()};
-function tick(){const ms=timerEnd?timerEnd-Date.now():timerLeft;if(ms==null)return;const s=Math.max(0,Math.ceil(ms/1000));$('#timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
- if(timerEnd&&ms<=0){clearInterval(timerIv);timerEnd=null;timerLeft=null;toast('タイムアップ！');try{navigator.vibrate&&navigator.vibrate([300,100,300])}catch(e){}}}
-// ---- 通信（PeerJS） ----
-let roomId='';
-function commit(){save();render();broadcast()}
-function broadcast(){conns.forEach(c=>{try{c.open&&c.send({type:'state',cfg,actions,allowGuest})}catch(e){}})}
-function setNet(t,on){$('#netPill').textContent=t;$('#netPill').classList.toggle('on',!!on)}
-function createRoom(){
- if(typeof Peer==='undefined'){toast('通信ライブラリを読み込めません。ローカルで起動します');return startLocal()}
- roomId=String(Math.floor(100000+Math.random()*900000));peer=new Peer('scoreroom-'+roomId);
- peer.on('open',()=>{mode='online';role='host';$('#roomPill').textContent='ルームID '+roomId;$('#roomPill').classList.remove('hide');setNet('ホスト',true);location.hash=roomId;afterStart()});
- peer.on('error',e=>{if(e.type==='unavailable-id')createRoom();else toast('通信エラー: '+e.type)});
- peer.on('connection',c=>{c.on('open',()=>{conns.push(c);c.send({type:'state',cfg,actions,allowGuest});setNet('ホスト・'+conns.length+'人接続',true)});
-  c.on('data',d=>{if(d.type==='hello'&&d.name&&!guestNames.includes(d.name)){guestNames.push(d.name);toast(d.name+' が参加');if(!$('#vSetup').classList.contains('hide'))renderSetup()}
-   if(!allowGuest)return;if(d.type==='act'){actions.push(d.a);commit()}if(d.type==='undo'){actions.pop();commit()}});
-  c.on('close',()=>{conns=conns.filter(x=>x!==c);setNet('ホスト・'+conns.length+'人接続',true)})});
-}
+function pickP(title,list,none,cb){openSheet(`<h3>${title}</h3><div class="pickg">${list.map(o=>`<button data-id="${o.id}">${esc(o.name)}</button>`).join('')}${none?'<button data-id="" style="background:var(--ac);color:#fff">いない</button>':''}</div>`,b=>b.querySelectorAll('button').forEach(x=>x.onclick=()=>{closeSheet();cb(x.dataset.id||null)}))}
+function send(a){if(role==='host'){actions.push(a);commit()}else hostConn&&hostConn.send({type:'act',a})}
+$('#gThru').onclick=()=>send({t:'s'});
+$('#gUndo').onclick=()=>{if(role==='host'){if(!actions.length)return toast('戻せる操作がありません');actions.pop();prevRes={};commit();toast('1つ戻しました')}else hostConn&&hostConn.send({type:'undo'})};
+$('#gMenu').onclick=()=>{const host=role==='host';
+ openSheet(`<h3>メニュー</h3>
+ ${mode==='online'?'<button class="mi" data-a="share"><span class="e">🔗</span>参加リンクを共有</button>':(host?'<button class="mi" data-a="online"><span class="e">📡</span>オンラインにする（ルームを作成）</button>':'')}
+ <button class="mi" data-a="timer"><span class="e">⏱</span>タイマー</button>
+ <button class="mi" data-a="big"><span class="e">🖥</span>大画面表示 ${document.body.classList.contains('big')?'をやめる':''}</button>
+ ${host?'<button class="mi" data-a="rule"><span class="e">⚙</span>ルール・メンバーを変更</button>':''}
+ ${host&&mode==='online'?`<button class="mi" data-a="guest"><span class="e">✋</span>参加者の操作：${allowGuest?'許可中':'禁止中'}</button>`:''}
+ ${host?'<button class="mi danger" data-a="reset"><span class="e">↺</span>得点をリセット</button>':''}
+ <button class="mi danger" data-a="leave"><span class="e">⎋</span>${host?'ルームを閉じる':'退出する'}</button>`,b=>b.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>menu(x.dataset.a)))};
+function menu(a){closeSheet();
+ if(a==='share')shareRoom();
+ if(a==='online')createRoom(true);
+ if(a==='timer')timerSheet();
+ if(a==='big')document.body.classList.toggle('big');
+ if(a==='rule'){editing=true;$('#rSearch').value='';gotoSetup(1)}
+ if(a==='guest'){allowGuest=!allowGuest;commit();toast(allowGuest?'参加者も○×を押せます':'ホストだけが操作できます')}
+ if(a==='reset')ask('得点をリセット','全員の得点と履歴を消して、最初からやり直します。','リセット',()=>{actions=[];prevRes={};commit()},true);
+ if(a==='leave')ask(role==='host'?'ルームを閉じますか？':'退出しますか？',role==='host'?'得点はこの端末に保存され、次回「前回の続きから」で再開できます。':'ホームに戻ります。','はい',leave,true)}
+$('#gRoom').onclick=()=>{if(mode==='online')shareRoom();else if(role==='host')createRoom(true)};
+function shareRoom(){const url=location.href.split('#')[0]+'#'+roomId;
+ openSheet(`<h3>ルームに招待</h3><div class="roomid">${roomId}</div><p style="text-align:center;color:var(--mut);font-size:13px;margin:-6px 0 16px">このIDをホームの「ルームに参加」に入力</p><button class="btn pri" data-s>リンクを送る</button><button class="btn" data-c style="margin-top:10px">リンクをコピー</button>`,b=>{
+  b.querySelector('[data-s]').onclick=async()=>{try{await navigator.share({title:'SCORE ROOM',text:'ルームID '+roomId,url})}catch(e){navigator.clipboard?.writeText(url);toast('リンクをコピーしました')}};
+  b.querySelector('[data-c]').onclick=()=>{navigator.clipboard?.writeText(url);toast('リンクをコピーしました')}})}
+function timerSheet(){const running=!!timerEnd,paused=timerLeft!=null;
+ openSheet(`<h3>タイマー</h3>${running||paused?`<div class="roomid" style="letter-spacing:.04em">${$('#timer').textContent}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn pri" data-t="toggle">${running?'一時停止':'再開'}</button><button class="btn" data-t="stop">リセット</button></div>`:
+ `<div class="pickg">${[1,3,5,10,15,20].map(m=>`<button data-m="${m}">${m}分</button>`).join('')}</div>`}`,b=>{
+  b.querySelectorAll('[data-m]').forEach(x=>x.onclick=()=>{timerLeft=null;timerEnd=Date.now()+x.dataset.m*60000;startTick();closeSheet()});
+  const tg=b.querySelector('[data-t="toggle"]');if(tg)tg.onclick=()=>{if(timerEnd){timerLeft=timerEnd-Date.now();timerEnd=null;clearInterval(timerIv)}else{timerEnd=Date.now()+timerLeft;timerLeft=null;startTick()}closeSheet()};
+  const sp=b.querySelector('[data-t="stop"]');if(sp)sp.onclick=()=>{timerEnd=null;timerLeft=null;clearInterval(timerIv);$('#tChip').classList.add('hide');closeSheet()}})}
+function startTick(){clearInterval(timerIv);$('#tChip').classList.remove('hide');timerIv=setInterval(tick,250);tick()}
+function tick(){const ms=timerEnd?timerEnd-Date.now():timerLeft;const s=Math.max(0,Math.ceil(ms/1000));$('#timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+ if(timerEnd&&ms<=0){clearInterval(timerIv);timerEnd=null;timerLeft=null;toast('⏱ タイムアップ！');buzz([300,100,300])}}
+$('#tChip').onclick=timerSheet;
+// ---------- network ----------
+function commit(){save();render();conns.forEach(c=>{try{c.open&&c.send({type:'state',cfg,actions,allowGuest})}catch(e){}})}
+function createRoom(fromGame){
+ if(typeof Peer==='undefined'){toast('通信できません。この端末だけで使います');return fromGame?0:startLocal()}
+ roomId=String(Math.floor(100000+Math.random()*900000));peer=new Peer('scoreroom-'+roomId);toast('ルームを作成中…');
+ peer.on('open',()=>{mode='online';role='host';history.replaceState(null,'','#'+roomId);if(fromGame){render();shareRoom()}else startHost()});
+ peer.on('error',e=>{if(e.type==='unavailable-id')createRoom(fromGame);else toast('通信エラー：'+e.type)});
+ peer.on('connection',c=>{c.on('open',()=>{conns.push(c);c.send({type:'state',cfg,actions,allowGuest});render()});
+  c.on('data',d=>{if(d.type==='hello'&&d.name){if(!guestNames.includes(d.name))guestNames.push(d.name);toast(d.name+' さんが参加しました');if(!$('#vSetup').classList.contains('hide')&&step===3)renderMembers()}
+   if(!allowGuest)return;if(d.type==='act'){actions.push(d.a);commit()}if(d.type==='undo'&&actions.length){actions.pop();prevRes={};commit()}});
+  c.on('close',()=>{conns=conns.filter(x=>x!==c);render()})})}
 function joinRoom(id,name){
- if(typeof Peer==='undefined'){toast('通信ライブラリを読み込めません');return}
- roomId=id;myName=name;peer=new Peer();setNet('接続中…');
+ if(typeof Peer==='undefined')return toast('通信できません');
+ roomId=id;myName=name;peer=new Peer();toast('接続中…');
  peer.on('open',()=>{hostConn=peer.connect('scoreroom-'+id,{reliable:true});
-  hostConn.on('open',()=>{role='guest';mode='online';setNet('参加中',true);$('#roomPill').textContent='ルームID '+id;$('#roomPill').classList.remove('hide');hostConn.send({type:'hello',name})});
+  hostConn.on('open',()=>{role='guest';mode='online';hostConn.send({type:'hello',name});show('vGame');$('#players').innerHTML='<p style="color:var(--mut)">ホストがルールを設定中です…</p>'});
   hostConn.on('data',d=>{if(d.type==='state'){cfg=d.cfg;actions=d.actions;allowGuest=d.allowGuest;show('vGame');render()}});
-  hostConn.on('close',()=>{setNet('切断');toast('ホストとの接続が切れました')})});
- peer.on('error',e=>{toast(e.type==='peer-unavailable'?'ルームが見つかりません':'通信エラー: '+e.type);setNet('ローカル')});
-}
-function afterStart(){const s=JSON.parse(localStorage.getItem('scoreroom')||'null');
- if(s&&s.cfg&&confirm('前回の続きから始めますか？')){cfg=s.cfg;actions=s.actions||[];show('vGame');commit()}
- else{cfg=defaultCfg();actions=[];renderSetup();show('vSetup')}}
-function startLocal(){mode='local';role='host';setNet('ローカル');afterStart()}
-$('#bCreate').onclick=createRoom;$('#bLocal').onclick=startLocal;
-$('#bJoin').onclick=()=>{const n=$('#jName').value.trim(),id=$('#jId').value.trim();if(!/^\d{6}$/.test(id))return toast('6桁のルームIDを入力');localStorage.setItem('scoreroom-name',n);joinRoom(id,n||'ゲスト')};
-$('#jName').value=localStorage.getItem('scoreroom-name')||'';
-if(/^#\d{6}$/.test(location.hash))$('#jId').value=location.hash.slice(1);
+  hostConn.on('close',()=>toast('ホストとの接続が切れました'))});
+ peer.on('error',e=>toast(e.type==='peer-unavailable'?'ルームが見つかりません':'通信エラー：'+e.type))}
+function startHost(){$('#rSearch').value='';cfg=defaultCfg();actions=[];editing=false;gotoSetup(1)}
+function startLocal(){mode='local';role='host';roomId='';startHost()}
+function leave(){try{peer&&peer.destroy()}catch(e){}peer=null;conns=[];hostConn=null;mode='local';role='host';roomId='';history.replaceState(null,'',location.pathname);show('vHome');homeInit()}
+$('#bCreate').onclick=()=>createRoom(false);$('#bLocal').onclick=startLocal;
+$('#bResume').onclick=()=>{const s=JSON.parse(localStorage.getItem('scoreroom2'));cfg=s.cfg;actions=s.actions||[];mode='local';role='host';prevRes={};show('vGame');render();
+ render()};
+$('#bJoin').onclick=()=>{const n=$('#jName').value.trim(),id=$('#jId').value.trim();if(!n){$('#jName').focus();return toast('ニックネームを入力してください')}if(!/^\d{6}$/.test(id)){$('#jId').focus();return toast('6桁のルームIDを入力してください')}localStorage.setItem('scoreroom-name',n);joinRoom(id,n)};
+function homeInit(){$('#jName').value=localStorage.getItem('scoreroom-name')||'';const h=location.hash.match(/^#(\d{6})$/);if(h){$('#jId').value=h[1];setTimeout(()=>($('#jName').value?$('#bJoin'):$('#jName')).focus(),50)}
+ $('#bResume').classList.toggle('hide',!localStorage.getItem('scoreroom2'))}
+homeInit();
 document.addEventListener('keydown',e=>{if($('#vGame').classList.contains('hide')||e.target.tagName==='INPUT')return;
- if((e.ctrlKey||e.metaKey)&&e.key==='z'){$('#bUndo').click();e.preventDefault()}if(e.key===' '){$('#bThrough').click();e.preventDefault()}});
+ if((e.ctrlKey||e.metaKey)&&e.key==='z'){$('#gUndo').click();e.preventDefault()}else if(e.key===' '){$('#gThru').click();e.preventDefault()}else if(e.key==='Escape')closeSheet()});
 </script></body></html>
