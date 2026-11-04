@@ -67,6 +67,7 @@ input{font:inherit;color:var(--tx)}
 .pl .tag{font-size:11px;font-weight:900;padding:3px 8px;border-radius:99px;white-space:nowrap}
 .pl .mn{font-size:46px;font-weight:900;text-align:center;line-height:1.05;padding:6px 8px 0;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .pl .sb{text-align:center;color:var(--mut);font-size:12.5px;min-height:18px;padding:2px 8px 10px;font-weight:600}
+.pl .tot{display:flex;justify-content:center;gap:12px;font-size:12px;font-weight:800;padding:0 0 10px;color:var(--mut)}.pl .tot span:first-child{color:var(--ok)}.pl .tot span:last-child{color:var(--ng)}
 .pl .bt{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 .pl .bt button{padding:16px 0;font-size:24px;font-weight:900}.pl .bt .o{color:var(--ok)}.pl .bt .x{color:var(--ng);border-left:1px solid var(--line)}
 .pl .bt button:active{background:var(--acs)}.pl .bt button:disabled{opacity:.25}
@@ -312,7 +313,7 @@ const ICON={free:'±',nomx:'○×',rentou:'連',nomrest:'休',newyork:'NY',updow
 const PRESETS=[['nomx',{N:7,M:3},'7○3×'],['nomx',{N:5,M:2},'5○2×'],['rentou',{N:7,M:3},'連答つき7○3×'],['updown',{N:10,M:2},'10updown'],['by',{N:10},'10by10'],['freeze',{N:10},'Freeze10'],['swedish',{N:10,M:10},'Swedish10'],['attack',{L:15,a:1,b:2},'アタサバ']];
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
-let cfg=null,actions=[],mode='local',role='host',peer=null,conns=[],hostConn=null,myName='',allowGuest=true,roomId='',guestNames=[],step=1,cat='すべて',prevRes={},editing=false;
+let cfgBak=null,cfg=null,actions=[],mode='local',role='host',peer=null,conns=[],hostConn=null,myName='',allowGuest=true,roomId='',guestNames=[],step=1,cat='すべて',prevRes={},editing=false;
 let timerEnd=null,timerLeft=null,timerIv=null;
 const show=v=>['vHome','vSetup','vGame'].forEach(x=>$('#'+x).classList.toggle('hide',x!==v));
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2000)};
@@ -335,7 +336,7 @@ function renderSetup(){
  ['st1','st2','st3'].forEach((id,i)=>$('#'+id).classList.toggle('on',i<step));
  [1,2,3].forEach(i=>$('#step'+i).classList.toggle('hide',i!==step));
  $('#sTitle').textContent=['ルールを選ぶ','ルール設定','プレイヤー'][step-1];
- $('#sNext').textContent=step===3?(editing&&actions.length?'変更を反映':'スタート'):'次へ';
+ $('#sNext').textContent=(editing==='rule'&&step===2)||(editing==='members'&&step===3)?'変更を反映':step===3?'スタート':'次へ';
  $('#sNext').parentElement.parentElement.classList.toggle('hide',step===1);
  if(roomId){$('#sRoom').textContent='ID '+roomId;$('#sRoom').classList.remove('hide')}
  if(step===1)renderRules();if(step===2)renderParams();if(step===3)renderMembers();
@@ -344,7 +345,7 @@ function renderRules(){
  const cats=['すべて','定番',...new Set(Object.values(RULES).map(r=>r.cat))];
  $('#rCats').innerHTML=cats.map(c=>`<button class="${c===cat?'on':''}">${c}</button>`).join('');
  [...$('#rCats').children].forEach((b,i)=>b.onclick=()=>{cat=cats[i];renderRules()});
- const q=$('#rSearch').value.trim().toLowerCase().replace(/[○o]/g,'○').replace(/[×x]/g,'×');
+ const q=$('#rSearch').value.trim().toLowerCase().replace(/(\d)\s*o/g,'$1○').replace(/(\d)\s*x/g,'$1×');
  let items=[];
  if(cat==='定番'&&!q)items=PRESETS.map(([k,p,n])=>({k,p,n,s:SHORT[k]}));
  else for(const k in RULES){const R=RULES[k];if(cat!=='すべて'&&cat!=='定番'&&R.cat!==cat)continue;
@@ -373,14 +374,20 @@ function renderMembers(){const R=RULES[cfg.rule];
   inp.onkeydown=e=>{if(e.key==='Enter'){const n=$('#memBox').querySelector(`[data-i="${+inp.dataset.i+1}"]`);n?n.focus():inp.blur()}}});
  $('#memBox').querySelectorAll('[data-v]').forEach(inp=>inp.oninput=()=>cfg.players[inp.dataset.v].v=Number(inp.value));
  $('#memBox').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{if(cfg.players.length>1){cfg.players.splice(b.dataset.d,1);renderMembers()}})}
-$('#sBack').onclick=()=>{if(step>1)gotoSetup(step-1);else if(editing&&cfg){editing=false;show('vGame');render()}else leave()};
-$('#sNext').onclick=()=>{if(step<3)return gotoSetup(step+1);
+$('#sBack').onclick=()=>{if(step>1&&!(editing==='members'&&step===3))gotoSetup(step-1);else if(editing&&cfg){editing=false;cfg=cfgBak||cfg;show('vGame');render()}else leave()};
+$('#sNext').onclick=()=>{const done=(editing==='rule'&&step===2)||step===3;if(!done)return gotoSetup(step+1);
  cfg.players.forEach((p,i)=>{if(!p.name.trim())p.name='プレイヤー'+(i+1)});
- const go=()=>{editing=false;prevRes={};commit();show('vGame')};
- if(editing&&actions.length)ask('得点はどうしますか？','ルールやメンバーを変えると、今の得点の計算結果が変わることがあります。','リセットして開始',()=>{actions=[];go()});
- else{actions=[];go()}};
+ const ids=new Set(cfg.players.map(p=>p.id));
+ const apply=reset=>{editing=false;prevRes={};show('vGame');
+  if(role==='guest'){hostConn&&hostConn.send({type:'cfg',cfg,reset});toast('変更を送りました');return}
+  actions=reset?[]:actions.filter(a=>(!a.p||ids.has(a.p))&&(!a.target||ids.has(a.target))&&(!a.second||ids.has(a.second)));commit();toast('変更しました')};
+ if(editing&&actions.length)openSheet(`<h3>今の得点はどうしますか？</h3><p style="color:var(--mut);font-size:14px;line-height:1.7;margin:0 0 16px">残す場合は、これまでの○×を新しいルールで計算し直します。</p><div style="display:grid;gap:10px"><button class="btn pri" data-keep>得点を残して変更</button><button class="btn" data-r style="color:var(--ng)">リセットして変更</button></div>`,b=>{b.querySelector('[data-keep]').onclick=()=>{closeSheet();apply(false)};b.querySelector('[data-r]').onclick=()=>{closeSheet();apply(true)}});
+ else apply(true)};
 // ---------- game ----------
-function render(){if(!cfg)return;const R=RULES[cfg.rule],P=cfg.params,st=replay(cfg,actions);
+function tally(){const t={};cfg.players.forEach(p=>t[p.id]={c:0,w:0});actions.forEach(a=>{if(t[a.p]){if(a.t==='c')t[a.p].c++;if(a.t==='w')t[a.p].w++}});return t}
+function statsSheet(){const t=tally(),q=replay(cfg,actions).q-1;const rows=cfg.players.map(p=>({n:p.name,...t[p.id]})).sort((a,b)=>b.c-a.c||a.w-b.w);
+ openSheet(`<h3>個人成績</h3><p style="color:var(--mut);font-size:13px;margin:-6px 0 12px">出題 ${q}問　｜　ルールに関係なく押した回数で集計</p><table style="width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums"><tr style="color:var(--mut);font-size:12px"><th style="text-align:left;padding:6px 4px">名前</th><th>正解</th><th>誤答</th><th>正答率</th></tr>${rows.map(r=>`<tr style="border-top:1px solid var(--line)"><td style="padding:10px 4px;font-weight:700">${esc(r.n)}</td><td style="text-align:center;color:var(--ok);font-weight:800">${r.c}</td><td style="text-align:center;color:var(--ng);font-weight:800">${r.w}</td><td style="text-align:center">${r.c+r.w?Math.round(r.c/(r.c+r.w)*100)+'%':'-'}</td></tr>`).join('')}</table>`)}
+function render(){if(!cfg)return;const R=RULES[cfg.rule],P=cfg.params,st=replay(cfg,actions),TL=tally();
  $('#qNo').textContent='Q'+st.q;$('#rName').textContent=R.name+'　'+R.params.map(x=>x.k+'='+P[x.k]).join(' ');
  const rw=st.players.filter(p=>p.reach.win).map(p=>p.name),rl=st.players.filter(p=>p.reach.lose).map(p=>p.name);
  const al=$('#alert');al.className='alert';
@@ -390,7 +397,7 @@ function render(){if(!cfg)return;const R=RULES[cfg.rule],P=cfg.params,st=replay(
  st.players.forEach(p=>{const v=R.view(p,P,st),rest=p.rest>0&&!p.res,blocked=(R.blocked&&R.blocked(p,P))||p.tried===st.q;
   let tag='';if(p.res==='win')tag=`<span class="tag t-win">${p.rank}位 抜け</span>`;else if(p.res==='lose')tag='<span class="tag t-lose">失格</span>';else if(rest)tag=`<span class="tag t-rest">休み${p.rest}</span>`;else if(p.reach.win||p.reach.lose)tag=`<span class="tag t-reach">${p.reach.win?'リーチ':'失格リーチ'}</span>`;
   const d=document.createElement('div');d.className='pl'+(p.res?' '+p.res:'')+(rest?' rest':'')+(role==='guest'&&p.name===myName?' me':'');
-  d.innerHTML=`<div class="hd"><span class="nm">${esc(p.name)}</span>${tag}</div><div class="mn">${v.main}</div><div class="sb">${esc(v.sub||'')}</div>`;
+  d.innerHTML=`<div class="hd"><span class="nm">${esc(p.name)}</span>${tag}</div><div class="mn">${v.main}</div><div class="sb">${esc(v.sub||'')}</div><div class="tot"><span>○${TL[p.id]?TL[p.id].c:0}</span><span>×${TL[p.id]?TL[p.id].w:0}</span></div>`;
   if(canEdit()){const dis=!!p.res||rest||blocked||st.ended;const bt=document.createElement('div');bt.className='bt';bt.innerHTML=`<button class="o" ${dis?'disabled':''}>○</button><button class="x" ${dis?'disabled':''}>×</button>`;
    bt.children[0].onclick=()=>{d.classList.add('pop');act('c',p.id)};bt.children[1].onclick=()=>{d.classList.add('pop');act('w',p.id)};d.appendChild(bt)}
   box.appendChild(d);
@@ -415,7 +422,8 @@ $('#gMenu').onclick=()=>{const host=role==='host';
  ${mode==='online'?'<button class="mi" data-a="share"><span class="e">🔗</span>参加リンクを共有</button>':(host?'<button class="mi" data-a="online"><span class="e">📡</span>オンラインにする（ルームを作成）</button>':'')}
  <button class="mi" data-a="timer"><span class="e">⏱</span>タイマー</button>
  <button class="mi" data-a="big"><span class="e">🖥</span>大画面表示 ${document.body.classList.contains('big')?'をやめる':''}</button>
- ${host?'<button class="mi" data-a="rule"><span class="e">⚙</span>ルール・メンバーを変更</button>':''}
+ ${canEdit()?'<button class="mi" data-a="rule"><span class="e">⚙</span>ルールを変更</button><button class="mi" data-a="members"><span class="e">👥</span>プレイヤーを編集</button>':''}
+ <button class="mi" data-a="stats"><span class="e">📊</span>個人成績（正解数・誤答数）</button>
  ${host&&mode==='online'?`<button class="mi" data-a="guest"><span class="e">✋</span>参加者の操作：${allowGuest?'許可中':'禁止中'}</button>`:''}
  ${host?'<button class="mi danger" data-a="reset"><span class="e">↺</span>得点をリセット</button>':''}
  <button class="mi danger" data-a="leave"><span class="e">⎋</span>${host?'ルームを閉じる':'退出する'}</button>`,b=>b.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>menu(x.dataset.a)))};
@@ -424,7 +432,9 @@ function menu(a){closeSheet();
  if(a==='online')createRoom(true);
  if(a==='timer')timerSheet();
  if(a==='big')document.body.classList.toggle('big');
- if(a==='rule'){editing=true;$('#rSearch').value='';gotoSetup(1)}
+ if(a==='rule'){editing='rule';cfgBak=cfg;cfg=JSON.parse(JSON.stringify(cfg));$('#rSearch').value='';gotoSetup(1)}
+ if(a==='members'){editing='members';cfgBak=cfg;cfg=JSON.parse(JSON.stringify(cfg));gotoSetup(3)}
+ if(a==='stats')statsSheet();
  if(a==='guest'){allowGuest=!allowGuest;commit();toast(allowGuest?'参加者も○×を押せます':'ホストだけが操作できます')}
  if(a==='reset')ask('得点をリセット','全員の得点と履歴を消して、最初からやり直します。','リセット',()=>{actions=[];prevRes={};commit()},true);
  if(a==='leave')ask(role==='host'?'ルームを閉じますか？':'退出しますか？',role==='host'?'得点はこの端末に保存され、次回「前回の続きから」で再開できます。':'ホームに戻ります。','はい',leave,true)}
@@ -452,17 +462,18 @@ function createRoom(fromGame){
  peer.on('error',e=>{if(e.type==='unavailable-id')createRoom(fromGame);else toast('通信エラー：'+e.type)});
  peer.on('connection',c=>{c.on('open',()=>{conns.push(c);c.send({type:'state',cfg,actions,allowGuest});render()});
   c.on('data',d=>{if(d.type==='hello'&&d.name){if(!guestNames.includes(d.name))guestNames.push(d.name);toast(d.name+' さんが参加しました');if(!$('#vSetup').classList.contains('hide')&&step===3)renderMembers()}
-   if(!allowGuest)return;if(d.type==='act'){actions.push(d.a);commit()}if(d.type==='undo'&&actions.length){actions.pop();prevRes={};commit()}});
+   if(!allowGuest)return;if(d.type==='act'){actions.push(d.a);commit()}if(d.type==='undo'&&actions.length){actions.pop();prevRes={};commit()}
+   if(d.type==='cfg'&&d.cfg){const ids=new Set(d.cfg.players.map(p=>p.id));cfg=d.cfg;actions=d.reset?[]:actions.filter(a=>(!a.p||ids.has(a.p))&&(!a.target||ids.has(a.target))&&(!a.second||ids.has(a.second)));prevRes={};commit();toast('ルールが変更されました')}});
   c.on('close',()=>{conns=conns.filter(x=>x!==c);render()})})}
 function joinRoom(id,name){
  if(typeof Peer==='undefined')return toast('通信できません');
  roomId=id;myName=name;peer=new Peer();toast('接続中…');
  peer.on('open',()=>{hostConn=peer.connect('scoreroom-'+id,{reliable:true});
   hostConn.on('open',()=>{role='guest';mode='online';hostConn.send({type:'hello',name});show('vGame');$('#players').innerHTML='<p style="color:var(--mut)">ホストがルールを設定中です…</p>'});
-  hostConn.on('data',d=>{if(d.type==='state'){cfg=d.cfg;actions=d.actions;allowGuest=d.allowGuest;show('vGame');render()}});
+  hostConn.on('data',d=>{if(d.type==='state'){if(editing)return;cfg=d.cfg;actions=d.actions;allowGuest=d.allowGuest;show('vGame');render()}});
   hostConn.on('close',()=>toast('ホストとの接続が切れました'))});
  peer.on('error',e=>toast(e.type==='peer-unavailable'?'ルームが見つかりません':'通信エラー：'+e.type))}
-function startHost(){$('#rSearch').value='';cfg=defaultCfg();actions=[];editing=false;gotoSetup(1)}
+function startHost(){$('#rSearch').value='';cfg=defaultCfg();actions=[];editing=false;prevRes={};commit();show('vGame');if(mode==='online')toast('ルームID '+roomId+'　ルールはメニューから変更できます');else toast('ルールはメニューから変更できます')}
 function startLocal(){mode='local';role='host';roomId='';startHost()}
 function leave(){try{peer&&peer.destroy()}catch(e){}peer=null;conns=[];hostConn=null;mode='local';role='host';roomId='';history.replaceState(null,'',location.pathname);show('vHome');homeInit()}
 $('#bCreate').onclick=()=>createRoom(false);$('#bLocal').onclick=startLocal;
